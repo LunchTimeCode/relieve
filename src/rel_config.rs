@@ -7,7 +7,7 @@ use serde_derive::Serialize;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Config {
-    pub files: Vec<String>,
+    files: Vec<String>,
 }
 
 impl Config {
@@ -16,14 +16,16 @@ impl Config {
             files: vec!["*.csv".to_string()],
         }
     }
-    
+
+    pub fn files(&self) -> Vec<String> {
+        self.files.clone()
+    }
+
     pub fn try_from_file() -> anyhow::Result<Self> {
-        let raw = fs::read_to_string("rel.toml").map_err(|err| 
-            anyhow!("Could not find config: {}", err.to_string())
-         )?;
-        let file: Config = toml::from_str(&raw).map_err(|err| 
-            anyhow!("Could read config: {}", err.to_string())
-         )?;
+        let raw = fs::read_to_string("rel.toml")
+            .map_err(|err| anyhow!("Could not find config: {}", err.to_string()))?;
+        let file: Config = toml::from_str(&raw)
+            .map_err(|err| anyhow!("Could read config: {}", err.to_string()))?;
         Ok(file)
     }
 }

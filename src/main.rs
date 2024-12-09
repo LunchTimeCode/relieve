@@ -1,8 +1,8 @@
 use colored::Colorize;
 
 mod commands;
-mod rel_config;
 mod rel;
+mod rel_config;
 
 #[tokio::main]
 async fn main() {

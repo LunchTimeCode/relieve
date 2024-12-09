@@ -36,5 +36,4 @@ enum Commands {
 
     /// [STABLE] creates an global example config
     Init {},
-    
 }
