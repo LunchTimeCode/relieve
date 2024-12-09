@@ -1,0 +1,14 @@
+[package]
+name = "relieve"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = { version = "4.4.8", features = ["derive", "unstable-doc", "env"] }
+serde = "1.0"
+serde_derive = "1"
+toml = "0.8"
+clap-markdown = "0.1.3"
+anyhow = "1.0.86"
+colored = "2"
+tokio = { version = "1", features = ["full"] }
