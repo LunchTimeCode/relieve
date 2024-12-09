@@ -1,38 +1,24 @@
-use crate::rel_config;
+use crate::{rel_config, report::{ErrorLines, Report, ResultLines}};
 use walkdir::WalkDir;
 
-pub struct ErrorLines {
-    pub lines: Vec<String>,
-}
 
-impl ErrorLines {
-    pub fn new() -> Self {
-        Self { lines: vec![] }
-    }
-
-    pub fn add(&mut self, line: impl Into<String>) {
-        self.lines.push(line.into());
-    }
-}
 
 pub fn read() -> anyhow::Result<String> {
     let config = rel_config::Config::try_from_file()?;
-    let mut errs = ErrorLines::new();
-    let found = files_available(config.files(), &mut errs);
+    let mut report = Report::new();
+    report.add_config(&config);
+    let found_files = files_available(config.files(), &mut report);
 
-    Ok(format!(
-        "Used config: {} | found {} | t find {}",
-        config,
-        found?.join(", "),
-        errs.lines.join(", ")
-    ))
+    Ok(report.as_toml())
 }
 
 fn files_available(
     files: Vec<String>,
-    error_lines: &mut ErrorLines,
+    report: &mut Report
 ) -> anyhow::Result<Vec<String>> {
     let mut found_paths = vec![];
+    
+    let mut left_over = files.clone(); 
 
     for entry in WalkDir::new(".")
         .follow_links(true)
@@ -40,18 +26,22 @@ fn files_available(
         .filter_map(|e| e.ok())
     {
         let f_name = entry.file_name().to_string_lossy();
-        let sec = entry.metadata()?.modified()?;
-
-        if files.contains(&f_name.to_string()) && sec.elapsed()?.as_secs() < 86400 {
+        
+        if files.contains(&f_name.to_string()){
             if let Some(p) = entry.path().to_str() {
                 found_paths.push(p.to_string());
+                report.add_found_file(p.to_string());
+                let index = left_over.iter().position(|x| *x == f_name.to_string()).unwrap();
+                left_over.remove(index);
             } else {
-                error_lines.add("Could not create Path");
+                report.add_generic_error("Could not create Path");
             }
-        } else {
-            error_lines.add(format!("Could not find {f_name}"));
         }
+        
+
     }
+    
+    left_over.iter().for_each(|f| report.add_not_found_file(f.to_string()));
 
     Ok(found_paths)
 }

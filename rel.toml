@@ -1,5 +1,6 @@
 files = [
     "Cargo.toml",
     "justfile",
-    "rel.rs"
+    "rel.rs",
+    "some_non_existent.yay"
 ]

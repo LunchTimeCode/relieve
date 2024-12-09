@@ -3,6 +3,7 @@ use colored::Colorize;
 mod commands;
 mod rel;
 mod rel_config;
+mod report;
 
 #[tokio::main]
 async fn main() {

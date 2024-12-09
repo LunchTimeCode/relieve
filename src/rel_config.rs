@@ -5,7 +5,7 @@ use anyhow::anyhow;
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Config {
     files: Vec<String>,
 }
@@ -15,6 +15,10 @@ impl Config {
         Self {
             files: vec!["*.csv".to_string()],
         }
+    }
+    
+    pub fn new(files: Vec<String>) -> Self {
+        Self { files }
     }
 
     pub fn files(&self) -> Vec<String> {
