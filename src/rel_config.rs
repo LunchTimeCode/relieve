@@ -5,24 +5,66 @@ use anyhow::anyhow;
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
 
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
+pub struct Files {
+    files: Vec<File>,
+}
+
+impl Files {
+    pub fn contains_name(&self, name: &str) -> bool {
+        self.files.iter().any(|f| f.name() == name)
+    }
+
+    pub fn get_names(&self) -> Vec<String> {
+        self.files.iter().map(|f| f.name()).collect()
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
+pub struct File {
+    name: String,
+    size: Option<u64>,
+}
+
+impl File {
+    pub fn name(&self) -> String {
+        self.name.clone()
+    }
+
+    pub fn example() -> Self {
+        Self {
+            name: "x.csv".to_string(),
+            size: Some(300),
+        }
+    }
+}
+
+impl FromIterator<File> for Files {
+    fn from_iter<I: IntoIterator<Item = File>>(iter: I) -> Self {
+        Files {
+            files: iter.into_iter().collect(),
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Config {
-    files: Vec<String>,
+    files: Files,
 }
 
 impl Config {
     pub fn example() -> Self {
         Self {
-            files: vec!["*.csv".to_string()],
+            files: Files::from_iter(vec![File::example()]),
         }
     }
-    
-    pub fn new(files: Vec<String>) -> Self {
-        Self { files }
+
+    pub fn files_names(&self) -> Vec<String> {
+        self.files.get_names()
     }
 
-    pub fn files(&self) -> Vec<String> {
-        self.files.clone()
+    pub fn contains_file(&self, name: &str) -> bool {
+        self.files.contains_name(name)
     }
 
     pub fn try_from_file() -> anyhow::Result<Self> {

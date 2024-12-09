@@ -2,10 +2,8 @@ use serde_derive::{Deserialize, Serialize};
 
 use crate::rel_config::{self, Config};
 
-
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct FileErrorLine{
+pub struct FileErrorLine {
     reason: String,
     content: String,
 }
@@ -19,7 +17,7 @@ impl FileErrorLine {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Pos{
+pub struct Pos {
     line: usize,
     col: usize,
 }
@@ -32,17 +30,20 @@ pub struct ErrorLines {
 
 impl ErrorLines {
     pub fn new() -> Self {
-        Self { files_not_found: vec![], generic: vec![] }
+        Self {
+            files_not_found: vec![],
+            generic: vec![],
+        }
     }
 
     pub fn add(&mut self, line: impl Into<String>) {
-        self.files_not_found.push(FileErrorLine::new("file not found", line.into()));
+        self.files_not_found
+            .push(FileErrorLine::new("file not found", line.into()));
     }
-    
+
     pub fn add_generic(&mut self, line: impl Into<String>) {
         self.generic.push(line.into());
     }
-    
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -67,13 +68,15 @@ pub struct ResultLines {
 
 impl ResultLines {
     pub fn new() -> Self {
-        Self { files_found: vec![] }
+        Self {
+            files_found: vec![],
+        }
     }
 
     pub fn add_files(&mut self, line: impl Into<String>) {
-        self.files_found.push(FileResultLine::new("file found", line.into()));
+        self.files_found
+            .push(FileResultLine::new("file found", line.into()));
     }
-    
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -91,26 +94,24 @@ impl Report {
             config: None,
         }
     }
-    
+
     pub fn as_toml(&self) -> String {
         toml::to_string_pretty(self).expect("not possible")
     }
-    
+
     pub fn add_found_file(&mut self, line: impl Into<String>) {
         self.result_lines.add_files(line);
     }
-    
+
     pub fn add_not_found_file(&mut self, line: impl Into<String>) {
         self.error_lines.add(line);
     }
-    
+
     pub fn add_config(&mut self, config: &Config) {
         self.config = Some(config.clone());
     }
-    
+
     pub fn add_generic_error(&mut self, line: impl Into<String>) {
         self.error_lines.add_generic(line);
     }
-
-    
 }
